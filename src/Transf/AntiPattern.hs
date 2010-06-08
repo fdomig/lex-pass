@@ -21,10 +21,10 @@ exprIsLRVal (ExprRVal (RValLRVal _)) = True
 exprIsLRVal _ = False
 
 exprLRValToRight :: Expr -> Transformed Expr
-exprLRValToRight (ExprBinOp op e1 w e2) =
-  if op `elem` [BEQ, BNE, BID, BNI] && exprIsLRVal e1 && not (exprIsLRVal e2)
-    then pure $ ExprBinOp op e2 w e1
-    else transfNothing
+exprLRValToRight (ExprBinOp op e1 w e2)
+  | op `elem` [BEQ, BNE, BID, BNI] && exprIsLRVal e1 && not (exprIsLRVal e2) = pure $ ExprBinOp op e2 w e1
+  | op `elem` [BLT] = pure $ ExprBinOp BGT e2 w e1
+  | op `elem` [BLE] = pure $ ExprBinOp BGE e2 w e1
 exprLRValToRight _ = transfNothing
 
 assignablesGoRight :: Ast -> Transformed Ast
