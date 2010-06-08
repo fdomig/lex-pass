@@ -2,7 +2,6 @@ module Transf.AntiPattern where
 
 -- todo:
 -- - for assignables-go-right
---   - support more BinOp's with "<=" -> ">=" etc
 --   - support joined conditionals on "&&", "||", etc
 -- - more anti-pattern correctors
 
@@ -22,7 +21,8 @@ exprIsLRVal _ = False
 
 exprLRValToRight :: Expr -> Transformed Expr
 exprLRValToRight (ExprBinOp op e1 w e2)
-  | op `elem` [BEQ, BNE, BID, BNI] && exprIsLRVal e1 && not (exprIsLRVal e2) = pure $ ExprBinOp op e2 w e1
+  | op `elem` [BEQ, BNE, BID, BNI] && exprIsLRVal e1 && not (exprIsLRVal e2) =
+	pure $ ExprBinOp op e2 w e1
   | op `elem` [BLT] = pure $ ExprBinOp BGT e2 w e1
   | op `elem` [BLE] = pure $ ExprBinOp BGE e2 w e1
 exprLRValToRight _ = transfNothing
