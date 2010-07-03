@@ -21,16 +21,16 @@ exprIsLRVal _ = False
 
 exprLRValToRight :: Expr -> Transformed Expr
 exprLRValToRight (ExprBinOp op e1 w e2)
-  | op `elem` [BEQ, BNE, BID, BNI] && exprIsLRVal e1 && not (exprIsLRVal e2) =
-	pure $ ExprBinOp op e2 w e1
-  | op `elem` [BLT] && exprIsLRVal e1 && not (exprIsLRVal e2) =
-	pure $ ExprBinOp BGT e2 w e1
-  | op `elem` [BLE] && exprIsLRVal e1 && not (exprIsLRVal e2) =
-	pure $ ExprBinOp BGE e2 w e1
-  | op `elem` [BGT] && exprIsLRVal e1 && not (exprIsLRVal e2) =
-    pure $ ExprBinOp BLT e2 w e1
-  | op `elem` [BGE] && exprIsLRVal e1 && not (exprIsLRVal e2) =
-    pure $ ExprBinOp BLE e2 w e1
+  | op `elem` [BEQ, BNE, BID, BNI] = swapIfGood op
+  | op == BLT = swapIfGood BGT
+  | op == BGT = swapIfGood BLT
+  | op == BLE = swapIfGood BGE
+  | op == BGE = swapIfGood BLE
+  | otherwise = transfNothing
+  where
+  swapIfGood op' = if exprIsLRVal e1 && not (exprIsLRVal e2)
+    then pure $ ExprBinOp op' e2 w e1
+    else transfNothing
 exprLRValToRight _ = transfNothing
 
 assignablesGoRight :: Ast -> Transformed Ast
